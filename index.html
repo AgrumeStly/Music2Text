@@ -107,113 +107,146 @@
         .copy-btn:hover { background: #444; }
         
         .loading { opacity: 0.5; pointer-events: none; }
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #2a2a2a;
+            text-align: center;
+            color: #666;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .footer a:hover {
+            opacity: 0.8;
+        }
+
+        .footer-emoji {
+            margin-bottom: 8px;
+            display: block;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>Music to Text</h1>
-        <p>输入歌名，生成适合发布在 Instagram 或 Twitter 的文本播放器</p>
-    </div>
-
-    <div class="search-box">
-        <input type="text" id="songInput" placeholder="输入歌曲名称..." onkeypress="if(event.key==='Enter') generateAll()">
-        <button id="genBtn" onclick="generateAll()">生成样式</button>
-    </div>
-
-    <div class="style-grid" id="styleGrid">
-        <div class="style-card">
-            <div class="style-name">Classic Bar</div>
-            <div class="display-area" id="out1">等待输入...</div>
-            <button class="copy-btn" onclick="copyText('out1')">复制样式</button>
+    <div class="container">
+        <div class="header">
+            <h1>Music to Text</h1>
+            <p>输入歌名，生成适合发布在 Instagram 或 Twitter 的文本播放器</p>
         </div>
 
-        <div class="style-card">
-            <div class="style-name">Waveform Vibe</div>
-            <div class="display-area" id="out2">等待输入...</div>
-            <button class="copy-btn" onclick="copyText('out2')">复制样式</button>
+        <div class="search-box">
+            <input type="text" id="songInput" placeholder="输入歌曲名称..." onkeypress="if(event.key==='Enter') generateAll()">
+            <button id="genBtn" onclick="generateAll()">生成样式</button>
         </div>
 
-        <div class="style-card">
-            <div class="style-name">Minimalist One-Line</div>
-            <div class="display-area" id="out3">等待输入...</div>
-            <button class="copy-btn" onclick="copyText('out3')">复制样式</button>
+        <div class="style-grid" id="styleGrid">
+            <div class="style-card">
+                <div class="style-name">Classic Bar</div>
+                <div class="display-area" id="out1">等待输入...</div>
+                <button class="copy-btn" onclick="copyText('out1')">复制样式</button>
+            </div>
+
+            <div class="style-card">
+                <div class="style-name">Waveform Vibe</div>
+                <div class="display-area" id="out2">等待输入...</div>
+                <button class="copy-btn" onclick="copyText('out2')">复制样式</button>
+            </div>
+
+            <div class="style-card">
+                <div class="style-name">Minimalist One-Line</div>
+                <div class="display-area" id="out3">等待输入...</div>
+                <button class="copy-btn" onclick="copyText('out3')">复制样式</button>
+            </div>
+
+            <div class="style-card">
+                <div class="style-name">Retro Compact</div>
+                <div class="display-area" id="out4">等待输入...</div>
+                <button class="copy-btn" onclick="copyText('out4')">复制样式</button>
+            </div>
         </div>
-
-        <div class="style-card">
-            <div class="style-name">Retro Compact</div>
-            <div class="display-area" id="out4">等待输入...</div>
-            <button class="copy-btn" onclick="copyText('out4')">复制样式</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    const sub = (s) => s.split('').map(c => ({'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'}[c]||c)).join('');
-    
-    function formatTime(ms) {
-        const s = Math.floor(ms / 1000);
-        return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-    }
-
-    async function generateAll() {
-        const query = document.getElementById('songInput').value;
-        if(!query) return;
-
-        const btn = document.getElementById('genBtn');
-        btn.innerText = "搜索中...";
         
-        try {
-            const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1`);
-            const data = await res.json();
-            if(!data.results.length) return alert("未找到歌曲");
+        <footer class="footer">
+            <span class="footer-emoji">🎵✨</span>
+            <p>&copy; 2026 <a href="https://agrumestly.top">agrumestly.top</a>.</p>
+            <p>Made by AgrumeStly. All rights reserved.</p>
+            <p>Made for creators who love music. No strings attached.</p>
+        </footer>
+    </div>
 
-            const track = data.results[0];
-            const name = track.trackName;
-            const artist = track.artistName;
-            const durMs = track.trackTimeMillis;
-            
-            // 随机进度
-            const ratio = 0.2 + Math.random() * 0.6; 
-            const curMs = durMs * ratio;
-            const curT = formatTime(curMs);
-            const totT = formatTime(durMs);
-
-            // 1. Classic Bar
-            const dotPos = Math.floor(ratio * 25);
-            let bar = "─".repeat(dotPos) + "⚪" + "─".repeat(25 - dotPos);
-            document.getElementById('out1').innerText = `🎵 ${name} - ${artist}\n\n${bar}\n◄◄⠀▐▐ ⠀►►⠀ ${sub(curT)} / ${sub(totT)}⠀ ──○─`;
-
-            // 2. Waveform Vibe
-            const waves = ["|", "||", "|||", "||||", "၊", "။", "၊၊"];
-            let randomWave = "";
-            for(let i=0; i<15; i++) randomWave += waves[Math.floor(Math.random()*waves.length)];
-            document.getElementById('out2').innerText = `${name}\n▶︎ ${randomWave} ${totT} ⋆.˚`;
-
-            // 3. Minimalist
-            const dotPosMini = Math.floor(ratio * 10)
-            let barMini = "─".repeat(dotPosMini) + "●" + "─".repeat(10 - dotPosMini);
-            document.getElementById('out3').innerText = `${name} － ${artist}\n${curT} ${barMini} ${totT}\n⇆ㅤ◁ㅤ ❚❚ㅤ ▷ㅤ ↻`;
-
-            // 4. Retro Compact
-            document.getElementById('out4').innerText = `vibe check: ${name}\n[${"■".repeat(dotPos/2)}${"□".repeat(12-dotPos/2)}] ${Math.floor(ratio*100)}%`;
-
-        } catch (e) {
-            alert("生成出错");
-        } finally {
-            btn.innerText = "生成样式";
+    <script>
+        const sub = (s) => s.split('').map(c => ({'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'}[c]||c)).join('');
+        
+        function formatTime(ms) {
+            const s = Math.floor(ms / 1000);
+            return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
         }
-    }
 
-    function copyText(id) {
-        const text = document.getElementById(id).innerText;
-        navigator.clipboard.writeText(text);
-        const btn = event.target;
-        btn.innerText = "已复制！";
-        setTimeout(() => btn.innerText = "复制样式", 1500);
-    }
-</script>
+        async function generateAll() {
+            const query = document.getElementById('songInput').value;
+            if(!query) return;
 
+            const btn = document.getElementById('genBtn');
+            btn.innerText = "搜索中...";
+            
+            try {
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1`);
+                const data = await res.json();
+                if(!data.results.length) return alert("未找到歌曲");
+
+                const track = data.results[0];
+                const name = track.trackName;
+                const artist = track.artistName;
+                const durMs = track.trackTimeMillis;
+                
+                // 随机进度
+                const ratio = 0.2 + Math.random() * 0.6; 
+                const curMs = durMs * ratio;
+                const curT = formatTime(curMs);
+                const totT = formatTime(durMs);
+
+                // 1. Classic Bar
+                const dotPos = Math.floor(ratio * 25);
+                let bar = "─".repeat(dotPos) + "⚪" + "─".repeat(25 - dotPos);
+                document.getElementById('out1').innerText = `🎵 ${name} - ${artist}\n\n${bar}\n◄◄⠀▐▐ ⠀►►⠀ ${sub(curT)} / ${sub(totT)}⠀ ──○─`;
+
+                // 2. Waveform Vibe
+                const waves = ["|", "||", "|||", "||||", "၊", "။", "၊၊"];
+                let randomWave = "";
+                for(let i=0; i<15; i++) randomWave += waves[Math.floor(Math.random()*waves.length)];
+                document.getElementById('out2').innerText = `${name}\n▶︎ ${randomWave} ${totT} ⋆.˚`;
+
+                // 3. Minimalist
+                const dotPosMini = Math.floor(ratio * 10)
+                let barMini = "─".repeat(dotPosMini) + "●" + "─".repeat(10 - dotPosMini);
+                document.getElementById('out3').innerText = `${name} － ${artist}\n${curT} ${barMini} ${totT}\n⇆ㅤ◁ㅤ ❚❚ㅤ ▷ㅤ ↻`;
+
+                // 4. Retro Compact
+                document.getElementById('out4').innerText = `vibe check: ${name}\n[${"■".repeat(dotPos/2)}${"□".repeat(12-dotPos/2)}] ${Math.floor(ratio*100)}%`;
+
+            } catch (e) {
+                alert("生成出错");
+            } finally {
+                btn.innerText = "生成样式";
+            }
+        }
+
+        function copyText(id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text);
+            const btn = event.target;
+            btn.innerText = "已复制！";
+            setTimeout(() => btn.innerText = "复制样式", 1500);
+        }
+    </script>
+    
 </body>
+
 </html>
