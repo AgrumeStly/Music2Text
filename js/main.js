@@ -5,26 +5,6 @@ function formatTime(ms) {
     return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
 }
 
-const namespace = "daniel-tian-agrumestlys"; // 建议用你的团队名
-const key = "music2text-gen-cnt";
-
-async function updateDisplayCount() {
-    try {
-        const response = await fetch(`https://api.counterapi.dev/v1/${namespace}/${key}`);
-        const data = await response.json();
-        document.getElementById('globalCount').innerText = data.count || 0;
-    } catch (err) {
-        document.getElementById('globalCount').innerText = "0";
-    }
-}
-
-async function incrementGlobalCount() {
-    try {
-        await fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`);
-        updateDisplayCount();
-    } catch (err) {}
-}
-
 async function generateAll() {
     const query = document.getElementById('songInput').value;
     if(!query) return;
@@ -159,5 +139,3 @@ function copyText(id) {
     setTimeout(() => btn.innerText = "复制样式", 1500);
 }
 
-
-updateDisplayCount();
