@@ -16,7 +16,6 @@ async function generateAll() {
         const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1`);
         const data = await res.json();
         if(!data.results.length) return alert("未找到歌曲");
-        incrementGlobalCount(); 
         const track = data.results[0];
         const name = track.trackName;
         const artist = track.artistName;
