@@ -5,7 +5,6 @@ function formatTime(ms) {
     return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
 }
 
-// 无需 API KEY，直接使用路径区分
 const namespace = "daniel-tian-agrumestlys"; // 建议用你的团队名
 const key = "music2text-gen-cnt";
 
