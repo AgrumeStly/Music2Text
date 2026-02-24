@@ -4,135 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music2Text - agrumestly.top</title>
-    <style>
-        :root {
-            --bg-color: #0f0f0f;
-            --card-bg: #1a1a1a;
-            --accent: #1db954;
-            --text: #eeeeee;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            padding: 40px 20px;
-            margin: 0;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-        }
-
-        .header { text-align: center; margin-bottom: 30px; }
-        h1 { font-size: 1.8rem; margin-bottom: 8px; }
-        p { color: #888; font-size: 0.9rem; }
-
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        input {
-            flex: 1;
-            padding: 14px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background: #222;
-            color: white;
-            font-size: 1rem;
-        }
-
-        button#genBtn {
-            background: var(--accent);
-            border: none;
-            padding: 0 25px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* 样式网格布局 */
-        .style-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-        }
-
-        .style-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid #2a2a2a;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .style-name {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-        }
-
-        .display-area {
-            background: #000;
-            padding: 20px;
-            border-radius: 8px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-            min-height: 80px;
-            margin-bottom: 15px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .copy-btn {
-            background: #333;
-            color: white;
-            border: none;
-            padding: 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: 0.2s;
-        }
-
-        .copy-btn:hover { background: #444; }
-        
-        .loading { opacity: 0.5; pointer-events: none; }
-        .footer {
-            margin-top: 60px;
-            padding-top: 20px;
-            border-top: 1px solid #2a2a2a;
-            text-align: center;
-            color: #666;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-        }
-
-        .footer a {
-            color: var(--accent);
-            text-decoration: none;
-            transition: opacity 0.2s;
-        }
-
-        .footer a:hover {
-            opacity: 0.8;
-        }
-
-        .footer-emoji {
-            margin-bottom: 8px;
-            display: block;
-            font-size: 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 
@@ -140,11 +12,17 @@
         <div class="header">
             <h1>Music to Text</h1>
             <p>输入歌名，生成适合发布在 Instagram 或 Twitter 的文本播放器</p>
+            <div class="counter-badge">
+                已累计生成 <span id="globalCount">...</span> 次
+            </div>
         </div>
 
         <div class="search-box">
-            <input type="text" id="songInput" placeholder="输入歌曲名称..." onkeypress="if(event.key==='Enter') generateAll()">
-            <button id="genBtn" onclick="generateAll()">生成样式</button>
+            <div class="input-wrapper">
+                <input type="text" id="songInput" placeholder="输入歌曲名称 (例如: Love Is Here)" autocomplete="off">
+                <div id="suggestions" class="suggestions-hidden"></div>
+            </div>
+            <button id="genBtn">生成</button>
         </div>
 
         <div class="style-grid" id="styleGrid">
@@ -180,73 +58,7 @@
             <p>Made for creators who love music. No strings attached.</p>
         </footer>
     </div>
-
-    <script>
-        const sub = (s) => s.split('').map(c => ({'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'}[c]||c)).join('');
-        
-        function formatTime(ms) {
-            const s = Math.floor(ms / 1000);
-            return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-        }
-
-        async function generateAll() {
-            const query = document.getElementById('songInput').value;
-            if(!query) return;
-
-            const btn = document.getElementById('genBtn');
-            btn.innerText = "搜索中...";
-            
-            try {
-                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1`);
-                const data = await res.json();
-                if(!data.results.length) return alert("未找到歌曲");
-
-                const track = data.results[0];
-                const name = track.trackName;
-                const artist = track.artistName;
-                const durMs = track.trackTimeMillis;
-                
-                // 随机进度
-                const ratio = 0.2 + Math.random() * 0.6; 
-                const curMs = durMs * ratio;
-                const curT = formatTime(curMs);
-                const totT = formatTime(durMs);
-
-                // 1. Classic Bar
-                const dotPos = Math.floor(ratio * 25);
-                let bar = "─".repeat(dotPos) + "⚪" + "─".repeat(25 - dotPos);
-                document.getElementById('out1').innerText = `🎵 ${name} - ${artist}\n\n${bar}\n◄◄⠀▐▐ ⠀►►⠀ ${sub(curT)} / ${sub(totT)}⠀ ──○─`;
-
-                // 2. Waveform Vibe
-                const waves = ["|", "||", "|||", "||||", "၊", "။", "၊၊"];
-                let randomWave = "";
-                for(let i=0; i<15; i++) randomWave += waves[Math.floor(Math.random()*waves.length)];
-                document.getElementById('out2').innerText = `${name}\n▶︎ ${randomWave} ${totT} ⋆.˚`;
-
-                // 3. Minimalist
-                const dotPosMini = Math.floor(ratio * 10)
-                let barMini = "─".repeat(dotPosMini) + "●" + "─".repeat(10 - dotPosMini);
-                document.getElementById('out3').innerText = `${name} － ${artist}\n${curT} ${barMini} ${totT}\n⇆ㅤ◁ㅤ ❚❚ㅤ ▷ㅤ ↻`;
-
-                // 4. Retro Compact
-                document.getElementById('out4').innerText = `vibe check: ${name}\n[${"■".repeat(dotPos/2)}${"□".repeat(12-dotPos/2)}] ${Math.floor(ratio*100)}%`;
-
-            } catch (e) {
-                alert("生成出错");
-            } finally {
-                btn.innerText = "生成样式";
-            }
-        }
-
-        function copyText(id) {
-            const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text);
-            const btn = event.target;
-            btn.innerText = "已复制！";
-            setTimeout(() => btn.innerText = "复制样式", 1500);
-        }
-    </script>
-    
+    <script src="js/main.js"></script>
 </body>
 
 </html>
